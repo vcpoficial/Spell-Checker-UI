@@ -1,0 +1,15 @@
+html {
+  scroll-behavior: smooth;
+}
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: max(884px, 100dvh);
+}
+
+body {
+  min-height: max(884px, 100dvh);
+}

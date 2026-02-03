@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spell Checker UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FF6B00",
+              "background-light": "#F2F4F7",
+              "background-dark": "#111827",
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#1F2937",
+              "item-light": "#F3F4F6",
+              "item-dark": "#374151",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'xl': '0.75rem',
+              '2xl': '1rem',
+              '3xl': '1.5rem',
+            },
+            boxShadow: {
+                'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                'glow': '0 4px 14px 0 rgba(255, 107, 0, 0.39)',
+            }
+          },
+        },
+      };
+    </script>
+<style>html { scroll-behavior: smooth; }
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 font-sans transition-colors duration-300">
+<main class="w-full max-w-[380px] bg-surface-light dark:bg-surface-dark rounded-3xl shadow-soft p-5 relative transition-colors duration-300">
+<header class="flex items-center justify-between mb-5">
+<div class="flex items-center gap-3">
+<div class="bg-primary text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-sm">
+<span class="material-icons-round text-lg transform -rotate-12">edit</span>
+</div>
+<h1 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Spell Checker</h1>
+</div>
+</header>
+<div class="bg-item-light dark:bg-item-dark p-1 rounded-xl flex mb-6 transition-colors duration-300">
+<button class="flex-1 text-gray-500 dark:text-gray-400 py-1.5 text-sm font-medium hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                Checks
+            </button>
+<button class="flex-1 bg-white dark:bg-gray-600 text-primary shadow-sm rounded-lg py-1.5 text-sm font-semibold transition-all duration-200">
+                Settings
+            </button>
+</div>
+<div class="space-y-4 mb-8">
+<div class="bg-item-light dark:bg-item-dark p-4 rounded-2xl flex items-center justify-between transition-colors duration-300">
+<div class="flex flex-col gap-0.5">
+<h3 class="text-[15px] font-semibold text-gray-900 dark:text-white">Auto-correct</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">Automatically fix common typos</p>
+</div>
+<div class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"></span>
+</div>
+</div>
+<div class="bg-item-light dark:bg-item-dark p-4 rounded-2xl flex items-center justify-between transition-colors duration-300">
+<div class="flex flex-col gap-0.5">
+<h3 class="text-[15px] font-semibold text-gray-900 dark:text-white">Check grammar</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">Flag grammatical errors</p>
+</div>
+<div class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"></span>
+</div>
+</div>
+<div class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300">
+<label class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2" for="api-key">OpenAI API Key</label>
+<input class="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl border-none px-3 py-2.5 text-sm placeholder-gray-400 focus:ring-2 focus:ring-primary shadow-sm" id="api-key" placeholder="sk-..." type="text"/>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Key is stored locally on your device.</p>
+</div>
+<div class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300">
+<label class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2">Model</label>
+<button class="w-full bg-white dark:bg-gray-700 text-left rounded-xl px-3 py-2.5 flex items-center justify-between shadow-sm group">
+<span class="text-sm font-medium text-gray-900 dark:text-white">GPT-4o</span>
+<span class="material-icons-round text-gray-400 text-xl group-hover:text-primary transition-colors">expand_more</span>
+</button>
+</div>
+<div class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300">
+<label class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2">Language</label>
+<button class="w-full bg-white dark:bg-gray-700 text-left rounded-xl px-3 py-2.5 flex items-center justify-between shadow-sm group">
+<span class="text-sm font-medium text-gray-900 dark:text-white">Português (BR)</span>
+<span class="material-icons-round text-gray-400 text-xl group-hover:text-primary transition-colors">expand_more</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-base shadow-glow hover:shadow-lg transform active:scale-[0.98] transition-all duration-200">
+            Save Changes
+        </button>
+</main>
+<img alt="Abstract subtle gradient background" class="hidden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_mKTW54zTUdVcEmWUEBHT6IU8rZsxFrkZ1HZFTHBvLbF3VGafTIQf33D671ImY1cmmiFGUiLer30j98S1pYGTWzZpwlv2ufPrZXQvraeOiRZdmpNXQvfUHXfT0bLauQdxSYKHcoAANZ1LpxZDGiBG-lt-tzyfoqtN5eeqC_kj7SenjG61gn1DkhD_Z0YkdyHYrM35ixjA2ZEj92wyHBw7go4AoVn4G7oZL-kDus_XhfSH6FAXVA_YGHh1Sv5eNG1awTW7j3_ZOZrO"/>
+
+</body></html>
