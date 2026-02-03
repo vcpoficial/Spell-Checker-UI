@@ -1,0 +1,4 @@
+node_modules/
+figma-plugin/node_modules/
+figma-plugin/dist/
+.DS_Store
