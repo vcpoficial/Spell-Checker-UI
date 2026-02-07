@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Spell Checker UI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FF8C00",
+              "background-light": "#F2F4F7",
+              "background-dark": "#111827",
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#1F2937",
+              "item-light": "#F3F4F6",
+              "item-dark": "#374151",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              "3xl": "1.5rem",
+            },
+            boxShadow: {
+              soft: "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
+              glow: "0 4px 14px 0 rgba(255, 140, 0, 0.39)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      body {
+        min-height: max(884px, 100dvh);
+      }
+      .hidden {
+        display: none !important;
+      } /* Ensure hidden utility works */
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 12px; /* Increased from 6px to account for "padding" */
+        height: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border: 4px solid transparent; /* Creates the padding effect */
+        background-clip: content-box;
+        border-radius: 9999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(107, 114, 128, 0.8);
+      }
+      /* Add vertical spacing (margin) to the scrollbar */
+      ::-webkit-scrollbar-button {
+        height: 20px;
+        display: block;
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 font-sans transition-colors duration-300"
+  >
+    <main
+      class="w-full max-w-[380px] h-full overflow-y-auto bg-surface-light dark:bg-surface-dark rounded-3xl shadow-soft p-5 relative transition-colors duration-300"
+    >
+      <header class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div
+            class="bg-primary text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
+          >
+            <span class="material-icons-round text-lg transform -rotate-12"
+              >edit</span
+            >
+          </div>
+          <h1
+            class="text-lg font-bold text-gray-900 dark:text-white tracking-tight"
+          >
+            Spell Checker
+          </h1>
+        </div>
+
+      </header>
+
+      <!-- Tab Navigation -->
+      <div
+        class="bg-item-light dark:bg-item-dark p-1 rounded-xl flex mb-6 transition-colors duration-300"
+      >
+        <button
+          id="tab-checks"
+          class="flex-1 bg-white dark:bg-gray-600 text-primary shadow-sm rounded-lg py-1.5 text-sm font-semibold transition-all duration-200"
+        >
+          Checks
+        </button>
+        <button
+          id="tab-settings"
+          class="flex-1 text-gray-500 dark:text-gray-400 py-1.5 text-sm font-medium hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+        >
+          Settings
+        </button>
+      </div>
+
+      <!-- CHECKS CONTENT -->
+      <div id="content-checks" class="space-y-4 mb-8">
+        <!-- Content injected dynamically -->
+        <div id="loading-checks" class="text-center text-gray-500 py-4 hidden">Scanning selection...</div>
+        <div id="empty-state-checks" class="text-center text-gray-500 py-4 hidden">No text nodes selected or no issues found.</div>
+      </div>
+
+      <!-- SETTINGS CONTENT (Hidden by default) -->
+      <div id="content-settings" class="space-y-4 mb-8 hidden">
+        <!-- Switch 1 -->
+        <div
+          class="bg-item-light dark:bg-item-dark p-4 rounded-2xl flex items-center justify-between transition-colors duration-300"
+        >
+          <div class="flex flex-col gap-0.5">
+            <h3 class="text-[15px] font-semibold text-gray-900 dark:text-white">
+              Auto-correct
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Automatically fix common typos
+            </p>
+          </div>
+          <div
+            id="switch-auto-correct"
+            class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+            role="switch"
+            aria-checked="true"
+          >
+            <span
+              aria-hidden="true"
+              class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+            ></span>
+          </div>
+        </div>
+        <!-- Switch 2 -->
+        <div
+          class="bg-item-light dark:bg-item-dark p-4 rounded-2xl flex items-center justify-between transition-colors duration-300"
+        >
+          <div class="flex flex-col gap-0.5">
+            <h3 class="text-[15px] font-semibold text-gray-900 dark:text-white">
+              Check grammar
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Flag grammatical errors
+            </p>
+          </div>
+          <div
+            id="switch-check-grammar"
+            class="toggle-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
+            role="switch"
+            aria-checked="true"
+          >
+            <span
+              aria-hidden="true"
+              class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+            ></span>
+          </div>
+        </div>
+        <!-- Input -->
+        <div
+          class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300"
+        >
+          <label
+            class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2"
+            for="api-key"
+            >OpenAI API Key</label
+          >
+          <input
+            class="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl border-none px-3 py-2.5 text-sm placeholder-gray-400 focus:ring-2 focus:ring-primary shadow-sm"
+            id="api-key"
+            placeholder="sk-..."
+            type="text"
+          />
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Key is stored locally on your device.
+          </p>
+        </div>
+        <!-- Dropdown 1 -->
+        <div
+          class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300 relative"
+        >
+          <label
+            class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2"
+            >Model</label
+          >
+          <button
+            id="dropdown-model"
+            class="dropdown-trigger w-full bg-white dark:bg-gray-700 text-left rounded-xl px-3 py-2.5 flex items-center justify-between shadow-sm group"
+          >
+            <span
+              class="selected-value text-sm font-medium text-gray-900 dark:text-white"
+              >GPT-4o</span
+            >
+            <span
+              class="material-icons-round text-gray-400 text-xl group-hover:text-primary transition-colors"
+              >expand_more</span
+            >
+          </button>
+          <!-- Dropdown Options (Hidden) -->
+          <div
+            class="dropdown-menu hidden absolute z-10 w-[calc(100%-2rem)] mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+          >
+            <div class="py-1" role="none">
+              <a
+                href="#"
+                class="dropdown-item text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                data-value="GPT-4o"
+                >GPT-4o</a
+              >
+              <a
+                href="#"
+                class="dropdown-item text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                data-value="GPT-3.5"
+                >GPT-3.5</a
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Dropdown 2 -->
+        <div
+          class="bg-item-light dark:bg-item-dark p-4 rounded-2xl transition-colors duration-300 relative"
+        >
+          <label
+            class="block text-[15px] font-semibold text-gray-900 dark:text-white mb-2"
+            >Language</label
+          >
+          <button
+            id="dropdown-language"
+            class="dropdown-trigger w-full bg-white dark:bg-gray-700 text-left rounded-xl px-3 py-2.5 flex items-center justify-between shadow-sm group"
+          >
+            <span
+              class="selected-value text-sm font-medium text-gray-900 dark:text-white"
+              >Português (BR)</span
+            >
+            <span
+              class="material-icons-round text-gray-400 text-xl group-hover:text-primary transition-colors"
+              >expand_more</span
+            >
+          </button>
+          <div
+            class="dropdown-menu hidden absolute z-10 w-[calc(100%-2rem)] mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+          >
+            <div class="py-1" role="none">
+              <a
+                href="#"
+                class="dropdown-item text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                data-value="Português (BR)"
+                >Português (BR)</a
+              >
+              <a
+                href="#"
+                class="dropdown-item text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                data-value="English (US)"
+                >English (US)</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Button - CHECKS -->
+      <div id="footer-checks-container">
+        <button
+          id="btn-correct-all"
+          class="w-full bg-primary hover:bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-base shadow-glow hover:shadow-lg transform active:scale-[0.98] transition-all duration-200"
+        >
+          Correct All 3 Typos
+        </button>
+      </div>
+
+      <!-- Footer Button - SETTINGS (Hidden) -->
+      <div id="footer-settings-container" class="hidden">
+        <button
+          id="btn-save-changes"
+          class="w-full bg-primary hover:bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-base shadow-glow hover:shadow-lg transform active:scale-[0.98] transition-all duration-200"
+        >
+          Save Changes
+        </button>
+      </div>
+    </main>
+    <img
+      alt="Abstract subtle gradient background"
+      class="hidden"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_mKTW54zTUdVcEmWUEBHT6IU8rZsxFrkZ1HZFTHBvLbF3VGafTIQf33D671ImY1cmmiFGUiLer30j98S1pYGTWzZpwlv2ufPrZXQvraeOiRZdmpNXQvfUHXfT0bLauQdxSYKHcoAANZ1LpxZDGiBG-lt-tzyfoqtN5eeqC_kj7SenjG61gn1DkhD_Z0YkdyHYrM35ixjA2ZEj92wyHBw7go4AoVn4G7oZL-kDus_XhfSH6FAXVA_YGHh1Sv5eNG1awTW7j3_ZOZrO"
+    />
+
+    <script>
+      let globalSettings = {};
+      let pendingSuggestions = [];
+
+      // Elements
+      const tabChecks = document.getElementById("tab-checks");
+      const tabSettings = document.getElementById("tab-settings");
+      const contentChecks = document.getElementById("content-checks");
+      const contentSettings = document.getElementById("content-settings");
+      const footerChecks = document.getElementById("footer-checks-container");
+      const footerSettings = document.getElementById("footer-settings-container");
+      const btnCorrectAll = document.getElementById("btn-correct-all");
+      const loadingChecks = document.getElementById("loading-checks");
+      const emptyStateChecks = document.getElementById("empty-state-checks");
+
+      // Settings Elements
+      const switchAutoCorrect = document.getElementById("switch-auto-correct");
+      const switchCheckGrammar = document.getElementById("switch-check-grammar");
+      const inputApiKey = document.getElementById("api-key");
+      const dropdownModel = document.getElementById("dropdown-model");
+      const dropdownLanguage = document.getElementById("dropdown-language");
+
+      // Tab Switching
+      tabChecks.addEventListener("click", () => {
+        contentChecks.classList.remove("hidden");
+        footerChecks.classList.remove("hidden");
+        contentSettings.classList.add("hidden");
+        footerSettings.classList.add("hidden");
+
+        tabChecks.className = "flex-1 bg-white dark:bg-gray-600 text-primary shadow-sm rounded-lg py-1.5 text-sm font-semibold transition-all duration-200";
+        tabSettings.className = "flex-1 text-gray-500 dark:text-gray-400 py-1.5 text-sm font-medium hover:text-gray-700 dark:hover:text-gray-200 transition-colors";
+      });
+
+      tabSettings.addEventListener("click", () => {
+        contentSettings.classList.remove("hidden");
+        footerSettings.classList.remove("hidden");
+        contentChecks.classList.add("hidden");
+        footerChecks.classList.add("hidden");
+
+        tabSettings.className = "flex-1 bg-white dark:bg-gray-600 text-primary shadow-sm rounded-lg py-1.5 text-sm font-semibold transition-all duration-200";
+        tabChecks.className = "flex-1 text-gray-500 dark:text-gray-400 py-1.5 text-sm font-medium hover:text-gray-700 dark:hover:text-gray-200 transition-colors";
+      });
+
+      // UI Helpers
+      function setSwitchState(switchEl, isOn) {
+        if (!switchEl) return;
+        switchEl.setAttribute("aria-checked", isOn);
+        const knob = switchEl.querySelector("span");
+        if (isOn) {
+            switchEl.classList.remove("bg-gray-200");
+            switchEl.classList.add("bg-primary");
+            knob.classList.remove("translate-x-0");
+            knob.classList.add("translate-x-5");
+        } else {
+            switchEl.classList.remove("bg-primary");
+            switchEl.classList.add("bg-gray-200");
+            knob.classList.remove("translate-x-5");
+            knob.classList.add("translate-x-0");
+        }
+      }
+
+      function updateCorrectAllButton() {
+        const count = pendingSuggestions.length;
+        if (count > 0) {
+            btnCorrectAll.textContent = `Correct All ${count} Typos`;
+            footerChecks.classList.remove('hidden');
+        } else {
+            footerChecks.classList.add('hidden');
+        }
+      }
+
+      function showLoading(show) {
+        if (show) {
+            loadingChecks.classList.remove('hidden');
+            emptyStateChecks.classList.add('hidden');
+        } else {
+            loadingChecks.classList.add('hidden');
+        }
+      }
+
+      // Settings Listeners
+      const switches = document.querySelectorAll(".toggle-switch");
+      switches.forEach((sw) => {
+        sw.addEventListener("click", () => {
+          const isChecked = sw.getAttribute("aria-checked") === "true";
+          setSwitchState(sw, !isChecked);
+        });
+      });
+
+      const dropdownTriggers = document.querySelectorAll(".dropdown-trigger");
+      dropdownTriggers.forEach((trigger) => {
+        trigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const menu = trigger.nextElementSibling;
+          const isHidden = menu.classList.contains("hidden");
+          document.querySelectorAll(".dropdown-menu").forEach((m) => m.classList.add("hidden"));
+          if (isHidden) menu.classList.remove("hidden");
+        });
+      });
+
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".dropdown-menu").forEach((m) => m.classList.add("hidden"));
+      });
+
+      document.querySelectorAll(".dropdown-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const value = item.getAttribute("data-value");
+          const menu = item.closest(".dropdown-menu");
+          const trigger = menu.previousElementSibling;
+          trigger.querySelector(".selected-value").textContent = value;
+          menu.classList.add("hidden");
+        });
+      });
+
+      // OpenAI Logic
+      async function checkBatchWithOpenAI(nodes) {
+        if (!globalSettings.apiKey) return [];
+        const model = globalSettings.model || 'GPT-4o'; 
+        const language = globalSettings.language || 'English (US)';
+        
+        // Map UI model name to API model name
+        const apiModel = model === 'GPT-4o' ? 'gpt-4o' : 'gpt-3.5-turbo';
+
+        // Prepare batch payload
+        const payload = nodes.map(n => ({ id: n.id, text: n.text }));
+
+        console.log('[DEBUG] Sending to OpenAI:', payload);
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${globalSettings.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: apiModel,
+                    response_format: { type: "json_object" },
+                    temperature: 0,
+                    messages: [
+                        {
+                            role: "system",
+                            content: `You are a highly precise spell checker and grammar corrector for ${language}.
+
+YOUR ONLY JOB: Find spelling mistakes and grammatical errors. Be EXTREMELY thorough.
+
+CRITICAL RULES:
+1. Scan EVERY SINGLE WORD in the text for typos.
+2. Common Portuguese typos to catch:
+   - Double consonants where there should be single: "trabalhanndo" → "trabalhando"
+   - Missing accents: "esta" → "está"
+   - Wrong verb conjugations
+3. For EVERY error found, mark it with tags:
+   - Original error: <del>error</del>
+   - Correction: <ins>correct</ins>
+4. If text has multiple errors, mark ALL of them. Return the FULL text with ALL corrections applied.
+5. Example output: "A equipe <del>esta</del> <ins>está</ins> <del>trabalhanndo</del> <ins>trabalhando</ins> na nova interface."
+
+OUTPUT FORMAT (JSON):
+{
+  "corrections": [
+    {
+      "id": "node_id",
+      "htmlDiff": "full text with <del> and <ins> tags",
+      "cleanText": "fully corrected text without tags. MUST CONTAIN ALL CORRECTIONS."
+    }
+  ]
+}
+
+IMPORTANT: Only include nodes that have actual errors. If text is perfect, omit it.`
+                        },
+                        { 
+                            role: "user", 
+                            content: JSON.stringify(payload) 
+                        }
+                    ]
+                })
+            });
+            
+            const data = await response.json();
+            console.log('[DEBUG] OpenAI Response:', data);
+            
+            if (data.error) {
+                console.error("OpenAI API Error:", data.error);
+                return [];
+            }
+            
+            if (data.choices && data.choices.length > 0) {
+                try {
+                    const content = data.choices[0].message.content;
+                    console.log('[DEBUG] OpenAI Content:', content);
+                    const parsed = JSON.parse(content);
+                    console.log('[DEBUG] Parsed corrections:', parsed.corrections);
+                    return parsed.corrections || [];
+                } catch (parseError) {
+                    console.error("Failed to parse OpenAI response:", parseError);
+                    return [];
+                }
+            }
+        } catch (e) {
+            console.error("OpenAI request failed:", e);
+        }
+        return [];
+      }
+
+      function renderSuggestion(nodeId, correctedHTML, finalCleanText) {
+        // Double check for validity
+        if (!correctedHTML || !finalCleanText) return;
+
+        // Clean HTML for display
+        const displayHTML = correctedHTML
+            .replace(/<del>/g, '<del class="text-gray-400 dark:text-gray-500 decoration-2">')
+            .replace(/<ins>/g, '<span class="text-primary font-bold">')
+            .replace(/<\/ins>/g, '</span>');
+
+        const card = document.createElement('div');
+        card.className = "flex gap-3 items-stretch suggestion-card transition-all duration-200 hover:scale-[1.01]";
+        card.dataset.nodeId = nodeId;
+        card.innerHTML = `
+          <div class="suggestion-text bg-item-light dark:bg-item-dark p-4 rounded-2xl text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 flex-1 font-medium transition-all duration-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-primary/20">
+            ${displayHTML}
+          </div>
+          <div class="flex flex-col gap-2 justify-center shrink-0">
+            <button class="btn-accept w-10 h-10 bg-item-light dark:bg-item-dark rounded-xl flex items-center justify-center text-gray-400 dark:text-gray-400 hover:text-primary hover:bg-orange-50 dark:hover:bg-orange-900/30 dark:hover:text-orange-400 transition-colors">
+              <span class="material-icons-round text-lg">check</span>
+            </button>
+            <button class="btn-ignore w-10 h-10 bg-item-light dark:bg-item-dark rounded-xl flex items-center justify-center text-gray-400 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors">
+              <span class="material-icons-round text-lg">close</span>
+            </button>
+          </div>
+        `;
+
+        // Add click handler to focus node in Figma
+        card.querySelector('.suggestion-text').addEventListener('click', () => {
+            parent.postMessage({ pluginMessage: { type: "focus-node", id: nodeId } }, "*");
+        });
+
+        // Add Listeners
+        card.querySelector('.btn-accept').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering focus
+            parent.postMessage({ pluginMessage: { type: "apply-correction", id: nodeId, newText: finalCleanText } }, "*");
+            card.remove();
+            removeFromPending(nodeId);
+        });
+
+        card.querySelector('.btn-ignore').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering focus
+            card.remove();
+            removeFromPending(nodeId);
+        });
+
+        contentChecks.appendChild(card);
+        
+        pendingSuggestions.push({
+            id: nodeId,
+            element: card,
+            newText: finalCleanText
+        });
+        
+        updateCorrectAllButton();
+        if (contentChecks.contains(emptyStateChecks)) emptyStateChecks.classList.add('hidden');
+      }
+
+      function removeFromPending(id) {
+        pendingSuggestions = pendingSuggestions.filter(p => p.id !== id);
+        updateCorrectAllButton();
+        if (pendingSuggestions.length === 0) {
+            emptyStateChecks.classList.remove('hidden');
+            emptyStateChecks.textContent = "All caught up!";
+        }
+      }
+
+      // Main Message Handler
+      window.onmessage = async (event) => {
+        const msg = event.data.pluginMessage;
+        
+        if (msg.type === 'load-settings') {
+            globalSettings = msg.settings || {};
+            // Populate Settings UI
+            if (globalSettings.autoCorrect !== undefined) setSwitchState(switchAutoCorrect, globalSettings.autoCorrect);
+            if (globalSettings.checkGrammar !== undefined) setSwitchState(switchCheckGrammar, globalSettings.checkGrammar);
+            if (globalSettings.apiKey) inputApiKey.value = globalSettings.apiKey;
+            if (globalSettings.model) dropdownModel.querySelector('.selected-value').textContent = globalSettings.model;
+            if (globalSettings.language) dropdownLanguage.querySelector('.selected-value').textContent = globalSettings.language;
+
+            // Trigger Scan
+            parent.postMessage({ pluginMessage: { type: "scan-selection" } }, "*");
+            showLoading(true);
+        }
+        else if (msg.type === 'scan-result') {
+            showLoading(false);
+            const nodes = msg.nodes;
+            contentChecks.innerHTML = ''; // Clear previous
+            contentChecks.appendChild(loadingChecks); 
+            contentChecks.appendChild(emptyStateChecks);
+            
+            pendingSuggestions = [];
+            updateCorrectAllButton();
+
+            if (!nodes || nodes.length === 0) {
+                emptyStateChecks.classList.remove('hidden');
+                emptyStateChecks.textContent = "No text layers selected.";
+                return;
+            }
+
+            if (!globalSettings.apiKey) {
+                emptyStateChecks.classList.remove('hidden');
+                emptyStateChecks.innerHTML = "Please add your OpenAI API Key in <a href='#' onclick='document.getElementById(\"tab-settings\").click(); return false;'>Settings</a>.";
+                return;
+            }
+
+            // Process nodes
+            emptyStateChecks.classList.add('hidden');
+            loadingChecks.classList.remove('hidden');
+            loadingChecks.textContent = "Checking " + nodes.length + " text layers...";
+
+            // Batch Processing
+            const corrections = await checkBatchWithOpenAI(nodes);
+            
+            loadingChecks.classList.add('hidden');
+
+            if (corrections && corrections.length > 0) {
+                 if (globalSettings.autoCorrect) {
+                     const batch = corrections.map(c => ({ id: c.id, newText: c.cleanText }));
+                     parent.postMessage({ pluginMessage: { type: "apply-batch-correction", corrections: batch } }, "*");
+                     
+                     // Auto-close after correction
+                     setTimeout(() => {
+                         parent.postMessage({ pluginMessage: { type: "close" } }, "*");
+                     }, 500); // Small delay to ensure users see the "Applied" toast if any
+                 } else {
+                     corrections.forEach(item => {
+                         renderSuggestion(item.id, item.htmlDiff, item.cleanText);
+                     });
+                 }
+            } else {
+                emptyStateChecks.classList.remove('hidden');
+                emptyStateChecks.textContent = "No issues found.";
+            }
+        }
+      };
+
+      // Main Button Listeners
+      btnCorrectAll.addEventListener("click", () => {
+        const batch = pendingSuggestions.map(p => ({ id: p.id, newText: p.newText }));
+        parent.postMessage({ pluginMessage: { type: "apply-batch-correction", corrections: batch } }, "*");
+        
+        pendingSuggestions.forEach(item => item.element.remove());
+        pendingSuggestions = [];
+        updateCorrectAllButton();
+        
+        emptyStateChecks.classList.remove('hidden');
+        emptyStateChecks.textContent = "Corrections applied!";
+      });
+
+      document.getElementById("btn-save-changes").addEventListener("click", () => {
+          const settings = {
+            autoCorrect: switchAutoCorrect.getAttribute("aria-checked") === "true",
+            checkGrammar: switchCheckGrammar.getAttribute("aria-checked") === "true",
+            apiKey: inputApiKey.value,
+            model: dropdownModel.querySelector('.selected-value').textContent,
+            language: dropdownLanguage.querySelector('.selected-value').textContent
+          };
+          globalSettings = settings; // Update local
+          parent.postMessage({ pluginMessage: { type: "save-settings", settings } }, "*");
+          
+          // Re-scan after saving
+          parent.postMessage({ pluginMessage: { type: "scan-selection" } }, "*");
+          showLoading(true);
+      });
+    </script>
+  </body>
+</html>

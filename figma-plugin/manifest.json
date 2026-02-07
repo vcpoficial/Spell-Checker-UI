@@ -1,6 +1,6 @@
 {
   "name": "Stitch Spec Check",
-  "id": "123456789",
+"id": "1601803126034042672",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
@@ -9,5 +9,15 @@
   "editorType": [
     "figma",
     "figjam"
-  ]
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://api.openai.com",
+      "https://cdn.tailwindcss.com",
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      "https://lh3.googleusercontent.com"
+    ]
+  },
+  "documentAccess": "dynamic-page"
 }
